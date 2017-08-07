@@ -1,0 +1,17 @@
+a              0.5e-6
+eta            0.0022
+T              298.15
+Salt           1e-4
+Nf             20.0
+dt             2e-6
+tmax           2.0
+Lp             3e-4
+L0             3e-7
+k0             1e-3
+Bt             40e-4
+Chi            1.4
+ti             0.2
+trex           1e-3
+ibm            2
+mag            1
+N              35
