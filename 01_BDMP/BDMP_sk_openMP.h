@@ -17,7 +17,7 @@ int ibm, mag, N;
 
 
 // Magnetic Parameters
-double Bt, Chi;
+double Bt, Chi, f;
 /* Bt: Magnetic field strength in Tesla
  * Chi: Particle susceptibility
  */
@@ -61,6 +61,7 @@ NameList nameList[] = {
     NameR(C2),        // surface to surface distance D(nm) and force Fsrfrpl(pN)...
     NameR(C3),        // by Fsrfrpl = -C1*ln(D)/D^2+C1/D^2-C2/D^2+2*C3*D.
     NameR(Bt),        // Magnetic field strength in Tesla
+    NameR(f),         // magnetic field frequency
     NameR(Chi),       // Particle susceptibility
     NameR(ti),        // Initial time in sec
     NameR(trex),      // Time of relaxation of field (Rinaldi JAP 2014)

@@ -4,20 +4,31 @@ Author: Ziyi Zhu
 Contact: wazzytrent@gmail.com
 Last_updated: March 6th, 2017
 ***********************************************
+UPDATED:
+Steve Kuei
+kuei.steve@rice.edu
+080717
+
+***********************************************
+to be run on davinci.rice.edu
 
 Prerequisite:
 	module load icc
 
 To Compile:
-	make                   -> DLVO version
-  make srfrpl            -> srfrpl version
-  make p_srfrpl          -> srfrpl parallel version
+	make                   -> openMP, 2D version, named paramag.out
 
 To Delete the compiled file:
 	make clean
 
 To Run the compiled file:
-	b2 input output.dat
+	paramag input output.dat
 
-The sample input file and job submission scripts have been included
-in the input and execute folder respectively.
+(note 'input.in' will fail - remove extension)
+
+execute
+- slurm batch files
+input
+- .in files with different input parameters.
+output
+- saved outputs. 

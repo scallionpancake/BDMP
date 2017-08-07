@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     double R[N][N];
     VecR2 u[N][N];
     VecR2 r[N], DF[N], dR[N];
-    VecR2 Fsrfrpl[N], Fmagc[N][N], Fstret[N], Fbend[N], Ftot[N];
+    VecR2 Fmagc[N][N], Fstret[N], Fbend[N], Ftot[N];
     VecR2 Dx[N][N], Dy[N][N], Dz[N][N], eff_f[N];
     VecR2 Mdp, H0, Hind, rv;
     VecR2 tmpstret, tmpsrfrpl;
@@ -138,7 +138,8 @@ int main(int argc, char **argv) {
         istep = istep + 1;
 
         //TODO sk: modify mag force. currently constant in X direction
-        VSet2(H0, Ht, 0);
+        // VSet2(H0, Ht, 0);
+        VSet2(H0, (Ht*cos(f * 2.0 * pi * (t - ti))), (Ht*sin(f * 2.0 * pi * (t - ti))));
         VSCopy2(Mdp, Mdpt, H0);
         Mdp2 = VDot2(Mdp,Mdp);
         // END MAG FORCE
