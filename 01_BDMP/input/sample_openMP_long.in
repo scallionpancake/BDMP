@@ -2,8 +2,9 @@ a        0.525e-6
 eta      0.0022
 T        298.15
 Nf       10.0
-dt       5e-6
-tmax     1.0
+dt       2e-6
+tmax     500.0
+Salt	 1e-4
 Lp       1.325e-3
 L0       316.0e-9
 k0       1.0e-4

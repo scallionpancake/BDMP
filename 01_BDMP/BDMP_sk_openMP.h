@@ -54,6 +54,7 @@ NameList nameList[] = {
     NameR(Nf),        // Number of frames recorded per second
     NameR(dt),        // Time step in sec, usually 1-2 us
     NameR(tmax),      // Total running time in sec
+    NameR(Salt),      // salt concentration
     NameR(Lp),        // Persistence Length in m
     NameR(L0),        // Relaxed length between particles in m
     NameR(k0),        // Hooke's spring constant of stiffness N/m

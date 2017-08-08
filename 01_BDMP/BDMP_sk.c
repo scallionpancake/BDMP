@@ -7,7 +7,7 @@
  */
 
 // EDITED: steve kuei (kuei.steve@rice.edu)
-// Last Updated: 080417
+// Last Updated: 080817
 
 /* References
 1. Ermak and McCammon JCP 1978
@@ -60,6 +60,18 @@ int main(int argc, char **argv) {
     // Bending constant
     double g_new = Lp*kb*T / (2*a+L0) / (2*a+L0); // g/L0 in Gauger's presentation
 
+    // Electrostatic force parameters
+    double e0 = 8.854e-12;     // permeability of vaccum
+    double er = 80;            // dielectric constant of water @ 25C, TODO: modify according to temp
+    double e = 1.6e-19;        // inversed Debye length
+    double z = 1.0;            // valency
+    double phi = 50e-3;        // zeta potential in mV
+    double phiw = 150e-3;              // zeta potential of wall in mV, [Crocker PRL 1996] and Graham Eq
+    double rho_infi = Salt*1000*6e23;  // number density in DLVO theory in 1/m3
+    double kapa = sqrt(Sqr(1.6e-19) * (2.0*Salt) * 1000 * 6e23 / (e0*er*kb*T));  // reduced surface potential
+    double gamma = tanh(z*e*phi/4/kb/T);                      // repulsion double-layer forces
+    double Celet = -64.0*pi*kb*T*a*rho_infi*Sqr(gamma)/kapa;  // electric force constant
+
     // Other Parameters
     int kf = (int)(1.0/dt/Nf+0.5);   //frame parameter
     int Nup = 2;                 //moment updating factor
@@ -73,7 +85,7 @@ int main(int argc, char **argv) {
     double R[N][N];
     VecR2 u[N][N];
     VecR2 r[N], DF[N], dR[N];
-    VecR2 Fmagc[N][N], Fstret[N], Fbend[N], Ftot[N];
+    VecR2 Fmagc[N][N], Fstret[N], Fbend[N], Ftot[N], Felec[N][N];
     VecR2 Dx[N][N], Dy[N][N], Dz[N][N], eff_f[N];
     VecR2 Mdp, H0, Hind, rv;
     VecR2 tmpstret, tmpsrfrpl;
@@ -125,6 +137,7 @@ int main(int argc, char **argv) {
 
     while (t < tmax) {
         if (istep % kf == 0) {
+        	fprintf(fp, "%15.4e\t", t);
             for (i=0; i<N; i++) {
                 fprintf(fp, "%15.4e\t", r[i].x);
             }
@@ -137,7 +150,7 @@ int main(int argc, char **argv) {
         t = t + dt;
         istep = istep + 1;
 
-        //TODO sk: modify mag force. currently constant in X direction
+        // Magnetic force, rotating at frequency f and magnitude Ht
         // VSet2(H0, Ht, 0);
         VSet2(H0, (Ht*cos(f * 2.0 * pi * (t - ti))), (Ht*sin(f * 2.0 * pi * (t - ti))));
         VSCopy2(Mdp, Mdpt, H0);
@@ -187,6 +200,26 @@ int main(int argc, char **argv) {
                 Fmagc[i][j].y = -3*mu0/(4*pi*pow(R[i][j],4)) * ((Mdp2-5.0*Sqr(VDot2(Mdp,u[i][j])))*u[i][j].y + VDot2(Mdp,u[i][j])*Mdp.y + VDot2(Mdp,u[i][j])*Mdp.y);
                 Fmagc[j][i].x = -Fmagc[i][j].x;
                 Fmagc[j][i].y = -Fmagc[i][j].y;
+
+                Felec[i][j].x = Celet*exp(-kapa*(R[i][j] - 2.0*a))*u[i][j].x;
+                Felec[i][j].y = Celet*exp(-kapa*(R[i][j] - 2.0*a))*u[i][j].y;
+                Felec[i][j].x = -Felec[j][i].x;
+                Felec[i][j].y = -Felec[j][i].y;
+
+                // better version: only fills half-matrix
+                // if ((j>=i+1) && (i<N-1)) {
+                    
+                //     Fmagc[i][j].x = -3 / (4 * pi*mu0*pow(R[i][j], 4)) * (((Mdp.x*Mdp.x + Mdp.y*Mdp.y) - 5 * Sqr(Mdp.x*u[i][j].x + Mdp.y*u[i][j].y))*u[i][j].x + 2.0*(Mdp.x*u[i][j].x + Mdp.y*u[i][j].y)*Mdp.x);
+                //     Fmagc[i][j].y = -3 / (4 * pi*mu0*pow(R[i][j], 4)) * (((Mdp.x*Mdp.x + Mdp.y*Mdp.y) - 5 * Sqr(Mdp.x*u[i][j].x + Mdp.y*u[i][j].y))*u[i][j].y + 2.0*(Mdp.x*u[i][j].x + Mdp.y*u[i][j].y)*Mdp.y);
+                //     Felec[i][j].x = Celet*exp(-kapa*(R[i][j] - 2.0*a))*u[i][j].x;
+                //     Felec[i][j].y = Celet*exp(-kapa*(R[i][j] - 2.0*a))*u[i][j].y;
+                    
+                    
+                //     Fmagc[i][j].x = -Fmagc[j][i].x;
+                //     Fmagc[i][j].y = -Fmagc[j][i].y;
+                //     Felec[i][j].x = -Felec[j][i].x;
+                //     Felec[i][j].y = -Felec[j][i].y;
+                // }
             }
         }
 
@@ -240,6 +273,7 @@ int main(int argc, char **argv) {
             VAdd2(Ftot[i], Ftot[i], Fbend[i]);
             for (j=0; j<N; j++) {
                 VAdd2(Ftot[i], Ftot[i], Fmagc[i][j]);
+                VAdd2(Ftot[i], Ftot[i], Felec[i][j]);
             }
         }
 
